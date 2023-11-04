@@ -46,7 +46,7 @@ always @(posedge i_CLK)
 				r_COUNTER <= 0;
 				r_BIT_INDEX <= 0;
 				
-				if (r_RX_DATA_S == 1'b1) begin
+				if (r_RX_DATA_S == 1'b0) begin
 					r_STATE <= s_START
 				end
 				else if
@@ -55,6 +55,7 @@ always @(posedge i_CLK)
 					
 			end
 		s_START:
+			
 		s_DATA:
 		s_END:
 		s_TRANSITION:
