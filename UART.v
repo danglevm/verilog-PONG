@@ -1,4 +1,4 @@
-module UART_top (
+module UART (
 	//50 MHz clock
 	input i_CLK,
 	
@@ -12,7 +12,7 @@ module UART_top (
 	output o_SEGA_3,
 	output o_SEGA_4,
 	output o_SEGA_5,
-	output o_SEGA_6
+	output o_SEGA_6,
 	
 	output o_SEGB_0,
 	output o_SEGB_1,
@@ -23,6 +23,14 @@ module UART_top (
 	output o_SEGB_6
 );
 
+//Constants
+//50 MHz clock
+parameter c_CYCLES_PER_SECOND = 50000000;
+//baud rate or in this case 1-bit bit rate
+parameter c_BAUD_RATE = 115200;
+//434 cycles/bit currently
+parameter c_CYCLES_PER_BIT = c_CYCLES_PER_SECOND/c_BAUD_RATE;
+
 wire w_SEGA_0, w_SEGB_0;
 wire w_SEGA_1, w_SEGB_1;
 wire w_SEGA_2, w_SEGB_2;
@@ -31,7 +39,7 @@ wire w_SEGA_4, w_SEGB_4;
 wire w_SEGA_5, w_SEGB_5;
 wire w_SEGA_6, w_SEGB_6;
 
-reg BYTE_DATA [7:0];
+reg [7:0] BYTE_DATA;
 
 
 BINARY_TO_7SEG_DISPLAY SEG7_A (
