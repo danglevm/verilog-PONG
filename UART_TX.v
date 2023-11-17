@@ -68,7 +68,7 @@ always @(posedge i_CLK)
 						r_BIT_INDEX = r_BIT_INDEX + 1'd1;
 						s_STATE <= s_DATA;
 					end else begin
-						r_BIT_INDEX <= 0
+						r_BIT_INDEX <= 0;
 						r_COUNTER <= 0;
 						s_STATE <= s_END;
 					end

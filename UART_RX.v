@@ -4,6 +4,7 @@ module UART_RX
 # (parameter c_CYCLES_PER_BIT)
 (
 	input i_CLK,
+	input i_RESET,
 	input i_SERIAL_DATA,
 	output [7:0] o_DATA_RX,
 	//tells the module upstream that the data inside of the byte is actually valid
@@ -30,6 +31,9 @@ parameter s_DATA = 5'b00100;
 parameter s_END = 5'b01000;
 parameter s_TRANSITION = 5'b10000;
 
+parameter c_HIGH = 1'b1;
+parameter c_LOW = 1'b0;
+
 
 //double register to synchronize inputs and avoid metastability
 always @ (posedge i_CLK)
@@ -38,7 +42,11 @@ always @ (posedge i_CLK)
 		r_RX_DATA_S <= r_RX_DATA_I;
 	end
 	
-	
+//reset 
+always @ (posedge i_RESET)
+	begin
+		r_STATE <= s_IDLE;
+	end
 	
 //FSM
 always @(posedge i_CLK) 
@@ -46,12 +54,12 @@ always @(posedge i_CLK)
 		case (r_STATE) 
 		s_IDLE:
 			begin
-				r_TRANSMISSION <= 1'b1;
-				r_RX_DV <= 1'b0;
+				r_TRANSMISSION <= c_HIGH;
+				r_RX_DV <= c_LOW;
 				r_COUNTER <= 0;
 				r_BIT_INDEX <= 0;
 				
-				if (r_RX_DATA_S == 1'b0) begin
+				if (r_RX_DATA_S == c_LOW) begin
 					r_STATE <= s_START;
 				end else begin
 					r_STATE <= s_IDLE;
@@ -62,7 +70,7 @@ always @(posedge i_CLK)
 			begin
 				if (r_COUNTER == ((c_CYCLES_PER_BIT - 1)/2) ) begin
 					//in the middle of the bit
-					if (r_RX_DATA_S == 1'b0) begin
+					if (r_RX_DATA_S == c_LOW) begin
 						r_STATE <= s_DATA;
 						r_COUNTER <= 0;
 					end else begin
@@ -98,7 +106,7 @@ always @(posedge i_CLK)
 			begin
 				//wait out the whole bit cycle for the stop bit to finish
 				if (r_COUNTER == (c_CYCLES_PER_BIT - 1)) begin
-					r_RX_DV <= 1'b1;
+					r_RX_DV <= c_HIGH;
 					r_COUNTER <= 0;
 					r_STATE <= s_TRANSITION;
 				end else begin
@@ -110,8 +118,8 @@ always @(posedge i_CLK)
 		s_TRANSITION:
 			begin
 				//wait for one clock cycle before continuing
-				r_TRANSMISSION <= 1'b1;
-				r_RX_DV <= 1'b0;
+				r_TRANSMISSION <= c_HIGH;
+				r_RX_DV <= c_LOW;
 				r_STATE <= s_IDLE;
 			end
 			
